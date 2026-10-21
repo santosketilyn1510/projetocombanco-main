@@ -7,53 +7,61 @@
 </head>
 <body class="container py-4">
 
+  <!-- Barra de Navegação -->
   <nav class="navbar navbar-dark bg-dark mb-4">
-  <div class="container">
-    <span class="navbar-brand">Estúdio de Tatuagem</span>
-    <div>
-      <a href="clientes.html" class="text-light me-3">Clientes</a>
-      <a href="senioridade.html" class="text-light me-3">Senioridade</a>
-      <a href="tatuadores.html" class="text-light me-3">Tatuadores</a>
-      <a href="agendamentos.html" class="text-light">Agendamentos</a>
-    </div>
-  </div>
-</nav>
-
     <div class="container">
       <span class="navbar-brand">Estúdio de Tatuagem</span>
       <div>
         <a href="clientes.html" class="text-light me-3">Clientes</a>
         <a href="senioridade.html" class="text-light me-3">Senioridade</a>
-        <span class="text-light fw-bold">Tatuadores</span>
+        <a href="estilos.html" class="text-light me-3">Estilos</a>
+        <a href="tatuadores.html" class="text-light me-3">Tatuadores</a>
+        <a href="agendamentos.html" class="text-light">Agendamentos</a>
       </div>
     </div>
   </nav>
 
   <h1>Tatuadores</h1>
 
-  <form id="form-tatuador" class="row g-2 mt-2 mb-4">
-    <div class="col-md-3">
-      <input type="text" id="nometatuador" class="form-control" placeholder="Nome" required>
+  <!-- Formulário de Cadastro / Edição -->
+  <form id="form-tatuador" class="row g-3 mt-2 mb-4">
+    <div class="col-md-4">
+      <label class="form-label">Nome</label>
+      <input type="text" id="nometatuador" class="form-control" required>
     </div>
-    <div class="col-md-2">
-      <input type="text" id="cpf" class="form-control" placeholder="CPF" required>
+    <div class="col-md-4">
+      <label class="form-label">CPF</label>
+      <input type="text" id="cpf" class="form-control" required>
     </div>
-    <div class="col-md-3">
-      <input type="email" id="email" class="form-control" placeholder="E-mail">
+    <div class="col-md-4">
+      <label class="form-label">E-mail</label>
+      <input type="email" id="email" class="form-control">
     </div>
-    <div class="col-md-2">
-      <input type="text" id="telefone" class="form-control" placeholder="Telefone">
+    <div class="col-md-4">
+      <label class="form-label">Telefone</label>
+      <input type="text" id="telefone" class="form-control">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-4">
+      <label class="form-label">Senioridade</label>
       <select id="idsenioridade" class="form-select" required>
-        <option value="">Senioridade...</option>
+        <!-- preenchido via JavaScript -->
       </select>
     </div>
-    <div class="col-md-2 mt-2">
+
+    <!-- Seção de Checkboxes de Estilos (Adicionada na Aula 10) -->
+    <div class="col-md-12">
+      <label class="form-label">Estilos que domina</label>
+      <div id="lista-estilos" class="d-flex flex-wrap gap-3">
+        <!-- preenchido via JavaScript -->
+      </div>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
       <button id="btn-submit-tatuador" type="submit" class="btn btn-primary w-100">Cadastrar</button>
     </div>
   </form>
 
+  <!-- Tabela de Listagem -->
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -63,12 +71,16 @@
         <th>E-mail</th>
         <th>Telefone</th>
         <th>Senioridade</th>
+        <th>Estilos</th>
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="corpo-tabela"></tbody>
+    <tbody id="corpo-tabela">
+      <!-- preenchido via JavaScript -->
+    </tbody>
   </table>
 
   <script src="js/tatuadores.js"></script>
+
 </body>
 </html>
