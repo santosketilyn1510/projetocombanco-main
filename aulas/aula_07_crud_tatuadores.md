@@ -74,6 +74,7 @@ E é exatamente por causa disso que a ordem da aula importa: **um tatuador só p
 
 Crie `backend/rotas/senioridade.py`. Essa tabela só tem `idsenioridade` e `nome` — o padrão de rotas é idêntico ao de clientes, você já sabe fazer:
 
+
 ```python
 # ============================================================
 # rotas/senioridade.py — CRUD de Senioridade
