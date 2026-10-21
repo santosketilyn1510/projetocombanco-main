@@ -40,10 +40,15 @@ carregarTatuadores()
 async function listarAgendamentos() {
   const resposta = await fetch(`${API}/agendamentos`)
   const agendamentos = await resposta.json()
+
   const corpo = document.getElementById('corpo-tabela')
   corpo.innerHTML = ''
 
   agendamentos.forEach(a => {
+    const imagemHtml = a.desenhoaprovado
+      ? `<img src="${API}/uploads/${a.desenhoaprovado}" style="max-width: 60px; max-height: 60px;">`
+      : '-'
+
     corpo.innerHTML += `
       <tr>
         <td>${a.idagendamento}</td>
@@ -53,6 +58,7 @@ async function listarAgendamentos() {
         <td>${a.horaagendamento}</td>
         <td>${a.valortatuagem ?? '-'}</td>
         <td>${a.status}</td>
+        <td>${imagemHtml}</td>
         <td>
           <button class="btn btn-sm btn-warning me-2" onclick='preencherFormularioEdicao(${JSON.stringify(a)})'>Editar</button>
           <button class="btn btn-sm btn-danger" onclick="deletarAgendamento(${a.idagendamento})">Excluir</button>
@@ -79,6 +85,7 @@ formAgendamento.addEventListener('submit', async (e) => {
   }
 
   const idAgendamento = formAgendamento.dataset.idAgendamento
+  let idParaUpload = idAgendamento
 
   if (idAgendamento) {
     await fetch(`${API}/agendamentos/${idAgendamento}`, {
@@ -87,10 +94,24 @@ formAgendamento.addEventListener('submit', async (e) => {
       body: JSON.stringify(agendamento)
     })
   } else {
-    await fetch(`${API}/agendamentos`, {
+    const resposta = await fetch(`${API}/agendamentos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(agendamento)
+    })
+    const dados = await resposta.json()
+    idParaUpload = dados.idagendamento
+  }
+
+  // Envio da imagem em requisição separada usando FormData
+  const arquivo = document.getElementById('desenho').files[0]
+  if (arquivo) {
+    const formData = new FormData()
+    formData.append('arquivo', arquivo)
+
+    await fetch(`${API}/agendamentos/${idParaUpload}/desenho`, {
+      method: 'POST',
+      body: formData // Não defina Content-Type manualmente aqui
     })
   }
 

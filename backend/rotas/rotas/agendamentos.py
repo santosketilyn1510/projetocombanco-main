@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from database import conectar
+import os
 
 router = APIRouter()
 
@@ -58,13 +59,14 @@ def criar_agendamento(agendamento: Agendamento):
     cursor = conn.cursor()
     cursor.execute(
         """INSERT INTO agendamento (idcliente, idtatuador, dataagendamento, horaagendamento, descricaotatuagem, valortatuagem)
-            VALUES (%s, %s, %s, %s, %s, %s)""",
+           VALUES (%s, %s, %s, %s, %s, %s)""",
         (agendamento.idcliente, agendamento.idtatuador, agendamento.dataagendamento,
          agendamento.horaagendamento, agendamento.descricaotatuagem, agendamento.valortatuagem)
     )
+    novo_id = cursor.lastrowid
     conn.commit()
     conn.close()
-    return {"mensagem": "Agendamento cadastrado com sucesso"}
+    return {"mensagem": "Agendamento cadastrado com sucesso", "idagendamento": novo_id}
 
 @router.put("/agendamentos/{id}")
 def atualizar_agendamento(id: int, agendamento: Agendamento):
