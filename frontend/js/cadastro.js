@@ -1,4 +1,6 @@
 const API = 'http://127.0.0.1:8000'
+protegerPagina() // Bloqueia se não estiver logado
+
 const formCadastro = document.getElementById('form-cadastro')
 
 formCadastro.addEventListener('submit', async (e) => {
@@ -10,15 +12,15 @@ formCadastro.addEventListener('submit', async (e) => {
     senha: document.getElementById('senha').value
   }
 
-  const resposta = await fetch(`${API}/usuarios`, {
+  const resposta = await fetchAutenticado(`${API}/usuarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(usuario)
   })
 
   if (resposta.ok) {
-    alert('Cadastro feito com sucesso!')
-    window.location.href = 'index.html'
+    alert('Funcionário cadastrado com sucesso!')
+    window.location.href = 'dashboard.html'
   } else {
     const erro = await resposta.json()
     alert('Erro ao cadastrar: ' + JSON.stringify(erro))
