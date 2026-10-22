@@ -7,7 +7,7 @@ router = APIRouter()
 class Estilo(BaseModel):
     descricao: str
 
-@router.get("/estilos")
+@router.get("")
 def listar_estilos():
     conn = conectar()
     cursor = conn.cursor(dictionary=True)
@@ -16,7 +16,7 @@ def listar_estilos():
     conn.close()
     return estilos
 
-@router.get("/estilos/{id}")
+@router.get("/{id}")
 def buscar_estilo(id: int):
     conn = conectar()
     cursor = conn.cursor(dictionary=True)
@@ -27,7 +27,7 @@ def buscar_estilo(id: int):
         return {"erro": "Estilo não encontrado"}
     return estilo
 
-@router.post("/estilos")
+@router.post("")
 def criar_estilo(estilo: Estilo):
     conn = conectar()
     cursor = conn.cursor()
@@ -36,7 +36,7 @@ def criar_estilo(estilo: Estilo):
     conn.close()
     return {"mensagem": "Estilo cadastrado com sucesso"}
 
-@router.put("/estilos/{id}")
+@router.put("/{id}")
 def atualizar_estilo(id: int, estilo: Estilo):
     conn = conectar()
     cursor = conn.cursor()
@@ -45,7 +45,7 @@ def atualizar_estilo(id: int, estilo: Estilo):
     conn.close()
     return {"mensagem": "Estilo atualizado com sucesso"}
 
-@router.delete("/estilos/{id}")
+@router.delete("/{id}")
 def deletar_estilo(id: int):
     conn = conectar()
     cursor = conn.cursor()

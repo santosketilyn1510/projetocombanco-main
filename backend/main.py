@@ -29,6 +29,14 @@ def inicio():
 
     from rotas import clientes, senioridade, tatuadores, agendamentos, estilos
 
-# ... (código existente) ...
+app.include_router(clientes.router, prefix="/clientes", tags=["Clientes"])
 
 app.include_router(estilos.router)
+
+app.include_router(clientes.router, prefix="/clientes", tags=["Clientes"])
+
+app.include_router(estilos.router, prefix="/estilos", tags=["Estilos"])
+
+app.include_router(tatuadores.router, prefix="/tatuadores", tags=["Tatuadores"])
+
+app.include_router(agendamentos.router, prefix="/agendamentos", tags=["Agendamentos"])

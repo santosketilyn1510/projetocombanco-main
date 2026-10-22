@@ -15,7 +15,7 @@ class Agendamento(BaseModel):
     valortatuagem: Optional[float] = None
     status: Optional[str] = None
 
-@router.get("/agendamentos")
+@router.get("")
 def listar_agendamentos():
     conn = conectar()
     cursor = conn.cursor(dictionary=True)
@@ -36,7 +36,7 @@ def listar_agendamentos():
 
     return agendamentos
 
-@router.get("/agendamentos/{id}")
+@router.get("/{id}")
 def buscar_agendamento(id: int):
     conn = conectar()
     cursor = conn.cursor(dictionary=True)
@@ -53,7 +53,7 @@ def buscar_agendamento(id: int):
 
     return agendamento
 
-@router.post("/agendamentos")
+@router.post("")
 def criar_agendamento(agendamento: Agendamento):
     conn = conectar()
     cursor = conn.cursor()
@@ -68,7 +68,7 @@ def criar_agendamento(agendamento: Agendamento):
     conn.close()
     return {"mensagem": "Agendamento cadastrado com sucesso", "idagendamento": novo_id}
 
-@router.put("/agendamentos/{id}")
+@router.put("/{id}")
 def atualizar_agendamento(id: int, agendamento: Agendamento):
     conn = conectar()
     cursor = conn.cursor()
@@ -85,7 +85,7 @@ def atualizar_agendamento(id: int, agendamento: Agendamento):
     conn.close()
     return {"mensagem": "Agendamento atualizado com sucesso"}
 
-@router.delete("/agendamentos/{id}")
+@router.delete("/{id}")
 def deletar_agendamento(id: int):
     conn = conectar()
     cursor = conn.cursor()
