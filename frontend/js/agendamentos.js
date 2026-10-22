@@ -1,143 +1,108 @@
+// ============================================================
+// js/agendamentos.js — Gerenciamento de Agendamentos (Autenticado)
+// ============================================================
+
 const API = 'http://127.0.0.1:8000'
+protegerPagina() // Bloqueia a página se não estiver logado
+
 const formAgendamento = document.getElementById('form-agendamento')
-const botaoSubmit = document.getElementById('btn-submit-agendamento')
-const blocoStatus = document.getElementById('bloco-status')
+const tabelaAgendamentos = document.getElementById('tabela-agendamentos')
 
-function limparFormulario() {
-  formAgendamento.reset()
-  delete formAgendamento.dataset.idAgendamento
-  botaoSubmit.textContent = 'Cadastrar'
-  botaoSubmit.classList.remove('btn-success')
-  botaoSubmit.classList.add('btn-primary')
-  blocoStatus.style.display = 'none'
-}
+// Carrega a lista de agendamentos e preenche a tabela
+async function carregarAgendamentos() {
+  try {
+    const resposta = await fetchAutenticado(`${API}/agendamentos`)
+    if (!resposta.ok) throw new Error('Erro ao carregar agendamentos')
 
-async function carregarClientes() {
-  const resposta = await fetch(`${API}/clientes`)
-  const clientes = await resposta.json()
-  const select = document.getElementById('idcliente')
-  select.innerHTML = '<option value="">Cliente...</option>'
+    const agendamentos = await resposta.json()
+    tabelaAgendamentos.innerHTML = ''
 
-  clientes.forEach(c => {
-    select.innerHTML += `<option value="${c.idcliente}">${c.nome}</option>`
-  })
-}
+    agendamentos.forEach(ag => {
+      // Verifica se tem desenho cadastrado para exibir o botão ou miniatura
+      let acaoDesenho = ag.desenho 
+        ? `<a href="${API}/static/${ag.desenho}" target="_blank" class="btn btn-sm btn-info">Ver Desenho</a>`
+        : `<button onclick="abrirModalDesenho(${ag.idagendamento})" class="btn btn-sm btn-secondary">Add Desenho</button>`
 
-async function carregarTatuadores() {
-  const resposta = await fetch(`${API}/tatuadores`)
-  const tatuadores = await resposta.json()
-  const select = document.getElementById('idtatuador')
-  select.innerHTML = '<option value="">Tatuador...</option>'
-
-  tatuadores.forEach(t => {
-    select.innerHTML += `<option value="${t.idtatuador}">${t.nometatuador}</option>`
-  })
-}
-
-carregarClientes()
-carregarTatuadores()
-
-async function listarAgendamentos() {
-  const resposta = await fetch(`${API}/agendamentos`)
-  const agendamentos = await resposta.json()
-
-  const corpo = document.getElementById('corpo-tabela')
-  corpo.innerHTML = ''
-
-  agendamentos.forEach(a => {
-    const imagemHtml = a.desenhoaprovado
-      ? `<img src="${API}/uploads/${a.desenhoaprovado}" style="max-width: 60px; max-height: 60px;">`
-      : '-'
-
-    corpo.innerHTML += `
-      <tr>
-        <td>${a.idagendamento}</td>
-        <td>${a.cliente}</td>
-        <td>${a.tatuador}</td>
-        <td>${a.dataagendamento}</td>
-        <td>${a.horaagendamento}</td>
-        <td>${a.valortatuagem ?? '-'}</td>
-        <td>${a.status}</td>
-        <td>${imagemHtml}</td>
+      const linha = document.createElement('tr')
+      linha.innerHTML = `
+        <td>${ag.idagendamento}</td>
+        <td>${ag.cliente_nome || ag.idcliente}</td>
+        <td>${ag.tatuador_nome || ag.idtatuador}</td>
+        <td>${ag.data_hora}</td>
+        <td>R$ ${Number(ag.valor).toFixed(2)}</td>
+        <td>${acaoDesenho}</td>
         <td>
-          <button class="btn btn-sm btn-warning me-2" onclick='preencherFormularioEdicao(${JSON.stringify(a)})'>Editar</button>
-          <button class="btn btn-sm btn-danger" onclick="deletarAgendamento(${a.idagendamento})">Excluir</button>
+          <button onclick="deletarAgendamento(${ag.idagendamento})" class="btn btn-sm btn-danger">Excluir</button>
         </td>
-      </tr>`
+      `
+      tabelaAgendamentos.appendChild(linha)
+    })
+  } catch (erro) {
+    console.error('Erro:', erro)
+  }
+}
+
+// Cadastrar novo agendamento
+if (formAgendamento) {
+  formAgendamento.addEventListener('submit', async (e) => {
+    e.preventDefault()
+
+    const agendamento = {
+      idcliente: parseInt(document.getElementById('idcliente').value),
+      idtatuador: parseInt(document.getElementById('idtatuador').value),
+      data_hora: document.getElementById('data_hora').value,
+      valor: parseFloat(document.getElementById('valor').value)
+    }
+
+    const resposta = await fetchAutenticado(`${API}/agendamentos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(agendamento)
+    })
+
+    if (resposta.ok) {
+      formAgendamento.reset()
+      carregarAgendamentos()
+      alert('Agendamento cadastrado com sucesso!')
+    } else {
+      const erro = await resposta.json()
+      alert('Erro ao cadastrar: ' + JSON.stringify(erro))
+    }
   })
 }
 
-listarAgendamentos()
-
-formAgendamento.addEventListener('submit', async (e) => {
-  e.preventDefault()
-
-  const agendamento = {
-    idcliente: Number(document.getElementById('idcliente').value),
-    idtatuador: Number(document.getElementById('idtatuador').value),
-    dataagendamento: document.getElementById('dataagendamento').value,
-    horaagendamento: document.getElementById('horaagendamento').value,
-    descricaotatuagem: document.getElementById('descricaotatuagem').value || null,
-    valortatuagem: document.getElementById('valortatuagem').value
-      ? Number(document.getElementById('valortatuagem').value)
-      : null,
-    status: document.getElementById('status').value
-  }
-
-  const idAgendamento = formAgendamento.dataset.idAgendamento
-  let idParaUpload = idAgendamento
-
-  if (idAgendamento) {
-    await fetch(`${API}/agendamentos/${idAgendamento}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(agendamento)
-    })
-  } else {
-    const resposta = await fetch(`${API}/agendamentos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(agendamento)
-    })
-    const dados = await resposta.json()
-    idParaUpload = dados.idagendamento
-  }
-
-  // Envio da imagem em requisição separada usando FormData
-  const arquivo = document.getElementById('desenho').files[0]
-  if (arquivo) {
-    const formData = new FormData()
-    formData.append('arquivo', arquivo)
-
-    await fetch(`${API}/agendamentos/${idParaUpload}/desenho`, {
-      method: 'POST',
-      body: formData // Não defina Content-Type manualmente aqui
-    })
-  }
-
-  limparFormulario()
-  listarAgendamentos()
-})
-
-function preencherFormularioEdicao(agendamento) {
-  document.getElementById('idcliente').value = agendamento.idcliente
-  document.getElementById('idtatuador').value = agendamento.idtatuador
-  document.getElementById('dataagendamento').value = agendamento.dataagendamento
-  document.getElementById('horaagendamento').value = agendamento.horaagendamento
-  document.getElementById('descricaotatuagem').value = agendamento.descricaotatuagem || ''
-  document.getElementById('valortatuagem').value = agendamento.valortatuagem || ''
-
-  document.getElementById('status').value = agendamento.status
-  blocoStatus.style.display = 'block'
-
-  formAgendamento.dataset.idAgendamento = agendamento.idagendamento
-  botaoSubmit.textContent = 'Salvar alteração'
-  botaoSubmit.classList.remove('btn-primary')
-  botaoSubmit.classList.add('btn-success')
-}
-
+// Excluir agendamento
 async function deletarAgendamento(id) {
-  if (!confirm('Tem certeza que deseja excluir este agendamento?')) return
-  await fetch(`${API}/agendamentos/${id}`, { method: 'DELETE' })
-  listarAgendamentos()
+  if (confirm('Tem certeza que deseja excluir este agendamento?')) {
+    const resposta = await fetchAutenticado(`${API}/agendamentos/${id}`, {
+      method: 'DELETE'
+    })
+
+    if (resposta.ok) {
+      carregarAgendamentos()
+    } else {
+      alert('Erro ao excluir agendamento.')
+    }
+  }
 }
+
+// Função auxiliar para envio de imagem/desenho (caso sua tela utilize modal ou input específico)
+async function enviarDesenho(idagendamento, arquivo) {
+  const formData = new FormData()
+  formData.append('file', arquivo)
+
+  const resposta = await fetchAutenticado(`${API}/agendamentos/${idagendamento}/desenho`, {
+    method: 'POST',
+    body: formData // Note que com FormData não definimos 'Content-Type', o navegador faz isso sozinho
+  })
+
+  if (resposta.ok) {
+    alert('Desenho enviado com sucesso!')
+    carregarAgendamentos()
+  } else {
+    alert('Erro ao enviar desenho.')
+  }
+}
+
+// Executa ao carregar a página
+carregarAgendamentos()

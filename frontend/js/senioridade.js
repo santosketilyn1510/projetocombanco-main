@@ -1,4 +1,5 @@
 const API = 'http://127.0.0.1:8000'
+protegerPagina()
 const formSenioridade = document.getElementById('form-senioridade')
 const botaoSubmit = document.getElementById('btn-submit-senioridade')
 
